@@ -1,57 +1,41 @@
-import os, asyncio, random, string, qrcode, time
-from io import BytesIO
+import os
+import asyncio
 from flask import Flask
 from threading import Thread
-from pyrogram import Client, filters, idle
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from motor.motor_asyncio import AsyncIOMotorClient
+from pyrogram import Client, idle
 
-# --- KEEP-ALIVE ---
+# --- KEEP ALIVE ---
 web = Flask('')
 @web.route('/')
-def home(): return "Bot is Online!"
+def home(): return "Bot is Live!"
 
 def run_web():
     port = int(os.environ.get("PORT", 8080))
     web.run(host='0.0.0.0', port=port)
 
-# --- CONFIG ---
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-MONGO_URI = os.getenv("MONGO_URI")
-OWNER_ID = 1853401283
-CHANNEL_USERNAME = "@linkvillaadmin"
-UPI_ID = "anuragjaat992@ibl"
-PREMIUM_PIC = "https://i.ibb.co/3y2p7bFP/image.png"
+# --- BOT CONFIG ---
+# Variables ko try-except mein rakha hai taki crash na ho
+try:
+    API_ID = int(os.getenv("API_ID", "0"))
+    API_HASH = os.getenv("API_HASH", "")
+    BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+except:
+    print("❌ Error: API_ID or other variables missing!")
 
 app = Client("linkvilla_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
-mongo = AsyncIOMotorClient(MONGO_URI)
-db = mongo["linkvilla_vfinal"]
-videos, premium_users, users_db = db["videos"], db["premium"], db["users"]
 
-# --- BOT LOGIC ---
-@app.on_message(filters.command("start"))
-async def start(client, message):
-    await users_db.update_one({"user_id": message.from_user.id}, {"$set": {"user_id": message.from_user.id}}, upsert=True)
-    await message.reply_text("👋 Welcome! Bot is working perfectly.")
-
-# --- STARTUP ---
-async def start_services():
-    # Start Web Server in Thread
+# --- SIMPLE STARTUP ---
+async def start_bot():
+    print("🚀 Starting Web Server...")
     Thread(target=run_web, daemon=True).start()
     
-    # Start Telegram Bot
+    print("🤖 Starting Telegram Bot...")
     await app.start()
-    print("✅ BOT STARTED SUCCESSFULLY!")
+    print("✅ BOT IS LIVE AND RUNNING!")
     await idle()
-    await app.stop()
 
 if __name__ == "__main__":
-    try:
-        asyncio.get_event_loop().run_until_complete(start_services())
-    except RuntimeError:
-        # If loop is already running, use this
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(start_services())
+    # Naye Python versions ke liye sabse best startup logic
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(start_bot())
