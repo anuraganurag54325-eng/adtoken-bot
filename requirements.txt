@@ -4,3 +4,5 @@ motor
 dnspython
 flask
 qrcode
+pillow
+asyncio
