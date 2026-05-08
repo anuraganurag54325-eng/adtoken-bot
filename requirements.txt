@@ -5,4 +5,3 @@ dnspython
 flask
 qrcode
 pillow
-asyncio
