@@ -185,6 +185,13 @@ async def add_b(client, message):
     bot = await client.get_me()
     await message.reply_text(f"✅ Batch Link: https://t.me/{bot.username}?start={name}")
 
-if __name__ == "__main__":
+async def main():
     keep_alive()
-    app.run()
+    await app.start()
+    print("LinkVilla Bot is Live!")
+    # Bot ko chalta rakhne ke liye infinite loop
+    while True:
+        await asyncio.sleep(3600)
+
+if __name__ == "__main__":
+    asyncio.run(main())
